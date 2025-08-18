@@ -7,6 +7,10 @@
 
 ---
 
+# 🎥 Live Demo
+
+[Watch the Live Demo on Loom](https://www.loom.com/share/7566d39131254596abd7bde968999c8f)
+
 ## The Future of Web3 Wallets — Powered by Natural Language & Account Abstraction
 
 **WALLET AI** is revolutionizing how users interact with blockchain. With a **built-in AI assistant**, **passkey-based authentication**, and full support for **ERC-4337 account abstraction**, it enables seamless, intuitive, and secure blockchain experiences — all in one click.
