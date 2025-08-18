@@ -35,7 +35,8 @@ contract SimpleAccountFactory {
     }
 
     function createAccount(
-        bytes32[2] memory publicKey
+        bytes32[2] memory publicKey,
+        uint32 callbackGasLimit
     ) external payable returns (SimpleAccount) {
         address addr = getAddress(publicKey);
 
@@ -51,7 +52,7 @@ contract SimpleAccountFactory {
         }
 
         // Mint the Genesis SBT to the new account
-        genesisSBT.mint(addr);
+        genesisSBT.mint(addr, callbackGasLimit);
 
         return
             SimpleAccount(

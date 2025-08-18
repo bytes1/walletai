@@ -57,12 +57,28 @@ This way, your on-chain identity evolves into a **trust-enhanced passport** for 
 
 ---
 
-> Soulbound NFTs in WALLET AI can evolve to include:
->
-> - ✅ **KYC with zkTLS proofs** for privacy-preserving identity verification
-> - ✅ **Reputation systems** (on-chain score/history tied to your wallet)
-> - ✅ **Achievements & credentials** (certifications, DAO memberships, hackathon badges)
-> - ✅ **Dynamic traits** that update based on your on-chain activity (e.g., staking level, governance participation, DeFi milestones)
-> - ✅ **Access control** for gated dApps, events, and communities using your Soulbound identity
->
-> This turns the Soulbound NFT into more than just a wallet certificate — it becomes your evolving, **trust-enhanced digital passport** for Web3.
+## 🎨 Genesis SBT NFT Details
+
+<img src="images/nft.png" height="500"/>
+
+Every WALLET AI identity begins with a **Genesis SBT** — your permanent proof of origin on-chain.
+
+| Attribute     | Value            |
+| ------------- | ---------------- |
+| **Edition**   | Genesis          |
+| **Status**    | Active           |
+| **Rarity**    | Mythic           |
+| **Minted On** | 2025-08-18       |
+| **Soulbound** | Non-transferable |
+| **KYC**       | Not Verified     |
+
+The Genesis SBT is a **soulbound token**, meaning it **cannot be transferred** or sold. Instead, it anchors your wallet’s existence and represents your **unique membership** in the Wallet AI ecosystem.
+
+Future updates will allow the NFT to **evolve dynamically**, integrating:
+
+- ✅ KYC verification (via zkTLS proofs)
+- ✅ Reputation-based traits & scores
+- ✅ Credentials (DAO memberships, hackathon badges, certifications)
+- ✅ Visual trait upgrades tied to on-chain activity
+
+This makes your Genesis SBT not just an ID but a **living passport for Web3**.
