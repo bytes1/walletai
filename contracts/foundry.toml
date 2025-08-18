@@ -7,5 +7,5 @@ bytecode_hash = "none"
 solc_version = "0.8.21"
 
 [rpc_endpoints]
-base_goerli = "https://base-sepolia-rpc.publicnode.com"
+base_sepolia = "https://base-sepolia-rpc.publicnode.com"
 
