@@ -1,0 +1,53 @@
+/* styles.module.css */
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 6xl;
+    width: 100%;
+    margin: 0 auto;
+  }
+  
+  .content {
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .form-container {
+    width: 100%;
+    padding: 16px;
+  }
+  
+  .form {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: transparent;
+    color: white;
+    outline: none;
+  }
+  
+  .button {
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+  }
+  
+  .button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .svg-icon {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+  

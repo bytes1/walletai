@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  rundler:
+    image: alchemyplatform/rundler
+    network_mode: "host"
+    command: node
+    ports:
+      - "4338:3000" # RPC port
+      - "8080:8080" # Metrics port
+    environment:
+      - RUST_LOG=INFO
+      - NODE_HTTP=
+      - BUILDER_PRIVATE_KEY= # Set in .env or via CLI
+      - CHAIN_ENTRY_POINT_ADDRESS_V0_6=0x2ae470412F8b53E263C8F967E9679e4830a2643A
+      - RUST_BACKTRACE=full
+      - CHAIN_ID=84532
+      - UNSAFE=true
+      - DISABLE_ENTRY_POINT_V0_7=true
+      - RPC_CORSDOMAIN=http://127.0.0.1:4337,http://localhost:4337
+
+  paymaster:
+    image: "node:23-alpine"
+    network_mode: "host"
+    user: "root"
+    volumes:
+      - ./paymaster:/app
+    env_file:
+      - .env
+    build:
+      context: ./paymaster
+    working_dir: /app
+    ports:
+      - "${PAYMASTER_PORT}:${PAYMASTER_PORT}"
+    command: ["./run.sh"]
