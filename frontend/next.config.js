@@ -1,14 +1,19 @@
 /** @type {import('next').NextConfig} */
-
-const fs = require("fs");
-module.exports = {
+const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  webpack: (config) => {
-    config.resolve.fallback = { fs: false, net: false, tls: false };
-    return config;
-  },
   typescript: {
+    
     ignoreBuildErrors: true,
   },
+  webpack: (config) => {
+    config.resolve.fallback = { fs: false, net: false, tls: false };
+    config.externals.push({
+      'node:crypto': 'crypto',
+    });
+
+    return config;
+  },
 };
+
+module.exports = nextConfig;

@@ -2,6 +2,9 @@ import { tool } from "ai";
 import { z } from "zod";
 import axios from "axios";
 import { ethers } from "ethers";
+import { Hex } from "viem";
+import { PUBLIC_CLIENT } from "@/constants"; // Assuming PUBLIC_CLIENT is exported from here
+import { MULTI_AUCTION_ABI } from "@/lib/blocklock"; // Assuming the ABI is here
 
 
 export const getWeather = tool({
@@ -154,10 +157,191 @@ export const readGenesisSbtFromChain = tool({
   },
 });
 
+export const getAuctionDetails = tool({
+  description: "Get details of all available auctions from the smart contract",
+  parameters: z.object({}),
+  execute: async () => {
+    try {
+      const AUCTION_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AUCTION_CONTRACT_ADDRESS as Hex;
+
+      // 1. Get the total number of auctions from the contract's auctionCounter
+      const totalAuctions = (await PUBLIC_CLIENT.readContract({
+        address: AUCTION_CONTRACT_ADDRESS,
+        abi: MULTI_AUCTION_ABI,
+        functionName: "auctionCounter",
+      })) as bigint; // Cast the result to bigint
+
+      const auctionCount = Number(totalAuctions);
+      const auctionsList = [];
+
+      // 2. Prepare all the contract read calls
+      const auctionDetailContracts = [];
+      for (let i = 0; i < auctionCount; i++) {
+        auctionDetailContracts.push({
+          address: AUCTION_CONTRACT_ADDRESS,
+          abi: MULTI_AUCTION_ABI,
+          functionName: "auctions",
+          args: [BigInt(i)],
+        });
+      }
+
+      // 3. Fetch all auction details in a single, efficient multicall
+      const results = await PUBLIC_CLIENT.multicall({
+        contracts: auctionDetailContracts,
+        allowFailure: true, // Continue if one call fails
+      });
+
+      // 4. Process the results
+      for (let i = 0; i < results.length; i++) {
+        const res = results[i];
+        if (res.status === 'success') {
+          // The result from viem is an array based on the struct's order
+          const auctionData = res.result as [string, Hex, bigint, boolean, Hex, bigint];
+          
+          auctionsList.push({
+            id: i,
+            description: auctionData[0],
+            beneficiary: auctionData[1],
+            biddingEndBlock: Number(auctionData[2]), // Convert bigint to number
+            ended: auctionData[3],
+          });
+        }
+      }
+
+      return {
+        auctions: auctionsList,
+      };
+    } catch (error) {
+      console.error("Error fetching auction details:", error);
+      return { error: "Failed to fetch data from the smart contract." };
+    }
+  },
+});
+
+export const bidForAuction = tool({
+  description: "Bid for an auction with a specific ID and amount",
+  parameters: z.object({
+    id: z.number().describe("The ID of the auction to bid on"),
+    amount: z.number().describe("The amount to bid"),
+  }),
+  execute: async ({ id, amount }) => {
+    return { id, amount };
+  },
+});
+
+export const getVotingProposals = tool({
+  description: "Get the current voting proposals from the smart contract",
+  parameters: z.object({}),
+  execute: async () => {
+    try {
+      const VOTING_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_VOTING_CONTRACT_ADDRESS as Hex;
+
+      // Fetch the total number of proposals and the current block number in parallel
+      const [totalProposals, currentBlockNumber] = await Promise.all([
+        PUBLIC_CLIENT.readContract({
+          address: VOTING_CONTRACT_ADDRESS,
+          abi: BLOCKLOCK_VOTING_ABI,
+          functionName: "proposalCounter",
+        }) as Promise<bigint>,
+        PUBLIC_CLIENT.getBlockNumber(),
+      ]);
+
+      const proposalCount = Number(totalProposals);
+      if (proposalCount === 0) {
+        return { proposals: [] }; // Return early if there are no proposals
+      }
+
+      // Prepare all the contract read calls for a multicall
+      const proposalContracts = Array.from({ length: proposalCount }, (_, i) => ({
+        address: VOTING_CONTRACT_ADDRESS,
+        abi: BLOCKLOCK_VOTING_ABI,
+        functionName: "proposals",
+        args: [BigInt(i)],
+      }));
+
+      // Fetch all proposal details in a single, efficient multicall
+      const results = await PUBLIC_CLIENT.multicall({
+        contracts: proposalContracts,
+        allowFailure: true,
+      });
+
+      // Process the results into the desired format
+      const proposalsList = results.map((res, i) => {
+        if (res.status === 'failure') {
+          return null; // Handle failed calls if necessary
+        }
+        
+        // The result from viem is an array based on the struct's order in the ABI:
+        // [string description, address proposer, uint votingEndBlock, uint yesVotes, uint noVotes]
+        const proposalData = res.result as [string, Hex, bigint, bigint, bigint];
+        const endingBlock = Number(proposalData[2]);
+        const status = currentBlockNumber < endingBlock ? "active" : "closed";
+
+        return {
+          id: i,
+          // The contract has one 'description' field, which we can use for both title and description.
+          title: proposalData[0],
+          description: proposalData[0],
+          status: status,
+          votesFor: Number(proposalData[3]),
+          votesAgainst: Number(proposalData[4]),
+          endingBlock: endingBlock,
+        };
+      }).filter(p => p !== null); // Filter out any nulls from failed calls
+
+      return {
+        proposals: proposalsList,
+      };
+    } catch (error) {
+      console.error("Error fetching voting proposals:", error);
+      return { error: "Failed to fetch proposal data from the smart contract." };
+    }
+  },
+});
+
+export const voteOnProposal = tool({
+  description: "Vote on a proposal with a specific ID",
+  parameters: z.object({
+    id: z.number().describe("The ID of the proposal to vote on"),
+    vote: z.enum(["yes", "no"]).describe("Your vote (yes or no)"),
+  }),
+  execute: async ({ id, vote }) => {
+    return { id, vote };
+  },
+});
+export const sendTimeLockedMessage = tool({
+  description: "Send a time-locked message to a specific address",
+  parameters: z.object({
+    address: z.string().describe("The recipient's address"),
+    message: z.string().describe("The message to send"),
+    unlockDate: z.string().describe("The date when the message can be unlocked"),
+  }),
+  execute: async ({ address, message, unlockDate }) => {
+    return { address, message, unlockDate };
+  },
+});
+
+export const getBombNftSecretMessage = tool({
+  description: "Get the secret message from the bomb NFT",
+  parameters: z.object({}),
+  execute: async () => {
+    return {
+      secretMessage: "You have 5 gasless transactions for 5 months.",
+    };
+  },
+});
+
 export const tools = {
   getWeather,
   cryptoToolPrice,
   Sendcrypto,
   Stakecrypto,
-  displayGenesisSbt
+  displayGenesisSbt,
+  getAuctionDetails,
+  bidForAuction,
+  getVotingProposals,
+  voteOnProposal,
+  sendTimeLockedMessage,
+  getBombNftSecretMessage,
 };
+

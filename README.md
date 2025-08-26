@@ -9,7 +9,7 @@
 
 # 🎥 Live Demo
 
-[Watch the Live Demo on Loom](https://youtu.be/lKZnB0gOny0)
+[Watch the Live Demo on Youtube](https://youtu.be/lKZnB0gOny0)
 
 ## The Future of Web3 Wallets — Powered by Natural Language & Account Abstraction
 
