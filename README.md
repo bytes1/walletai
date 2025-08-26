@@ -31,7 +31,7 @@ The reason for WALLET AI is simple: blockchain is a technology that needs to be 
 
 ---
 
-## 🧩 Key Features
+## 🔑 Key Features
 
 - ✅ Built-in AI assistant for natural language-based transactions
 - ✅ Account Abstraction via ERC-4337 (supports EntryPoint v0.6)
@@ -46,14 +46,36 @@ The reason for WALLET AI is simple: blockchain is a technology that needs to be 
 
 ## 🚀 New Integrations
 
-✅ Sealed Bid Auctions: Bid on auctions with encrypted amounts using dcipher network blocklock encryption.
+**WALLET AI** is not just a wallet; it’s an evolving ecosystem. We are continuously integrating cutting-edge features that leverage the power of AI and Account Abstraction to deliver unparalleled functionality.
 
-✅ Encrypted Voting: Cast your vote on proposals with encrypted choices.
+### ✅ Sealed-Bid Auctions with Blocklock Encryption
 
-✅ Governance Portal: View and vote on proposals.
+Revolutionizing on-chain auctions. With our integration of the **dcipher network's blocklock encryption**, you can participate in **sealed-bid auctions** where your bid amount remains completely secret until the bidding period is over.
 
-✅ Time-Locked Messages: Send messages that can only be unlocked at a future date.
+- **Why it matters:** This ensures ultimate fairness and prevents "front-running," where other bidders can see your bid and place a slightly higher one at the last second. Your strategy stays yours, giving everyone an equal chance to win.
 
-✅ Bomb NFT: Reveal the secret message from your Bomb NFT.
+<img src="images/1.png" height="500"/>
 
-✅ Gasless Transactions: Get information about your gasless transaction status.
+### ✅ Encrypted Voting & Governance Portal
+
+Participate in decentralized governance with true privacy. Our new **Governance Portal** allows you to view and vote on proposals, but with a critical enhancement: your vote is **encrypted**. No one can see how you voted until the polling period concludes and all votes are revealed simultaneously.
+
+- **Why it matters:** This prevents voter coercion and influence based on early tallies, fostering a more democratic and unbiased decision-making process for DAOs and dApp communities.
+
+### ✅ Time-Locked Messages
+
+Send digital messages and assets into the future. Our **Time-Locked Messages** feature allows you to encrypt information and schedule its release for a specific future date or block height. The contents remain completely inaccessible until the designated time is reached.
+
+- **Why it matters:** This opens up novel use cases like creating digital time capsules, scheduling future inheritances or wills, or sending sensitive data that should only be revealed at the perfect moment.
+
+### ✅ Bomb NFT: The NFT with a Secret
+
+Unlock the mystery within your assets. The **Bomb NFT** is a unique digital collectible that contains a hidden, encrypted message. This secret is only revealed to the owner after a specific time-lock condition has passed, turning your NFT into an exciting, evolving experience.
+
+- **Why it matters:** This adds a new layer of engagement and value to NFTs, creating a sense of anticipation and a unique story behind each token.
+
+### ✅ Gasless Transaction Status
+
+Stay informed about your gasless activities. While **WALLET AI** handles the gas fees for you, we believe in full transparency. This feature provides a clear, real-time status of your "UserOperations," so you can see exactly where your transaction is in the process—from the bundler to on-chain confirmation.
+
+- **Why it matters:** It demystifies the magic of account abstraction, giving you confidence and insight into how your gasless transactions are being processed securely and efficiently.
