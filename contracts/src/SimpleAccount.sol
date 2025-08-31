@@ -11,6 +11,10 @@ import "openzeppelin-contracts/contracts/interfaces/IERC1271.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
+// BLOCKLOCK: Import Blocklock contracts
+import {TypesLib} from "blocklock-solidity/src/libraries/TypesLib.sol";
+import {AbstractBlocklockReceiver} from "blocklock-solidity/src/AbstractBlocklockReceiver.sol";
+
 struct Signature {
     bytes authenticatorData;
     string clientDataJSON;
@@ -26,7 +30,14 @@ struct Call {
     bytes data;
 }
 
-contract SimpleAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
+// BLOCKLOCK: Inherit from AbstractBlocklockReceiver
+contract SimpleAccount is
+    IAccount,
+    UUPSUpgradeable,
+    Initializable,
+    IERC1271,
+    AbstractBlocklockReceiver
+{
     struct PublicKey {
         bytes32 X;
         bytes32 Y;
@@ -35,29 +46,36 @@ contract SimpleAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
     IEntryPoint public immutable entryPoint;
     PublicKey public publicKey;
 
+    // BLOCKLOCK: State to store encrypted calls, mapping request ID to ciphertext
+    mapping(uint256 => TypesLib.Ciphertext) public encryptedCalls;
+
     event SimpleAccountInitialized(
         IEntryPoint indexed entryPoint,
         bytes32[2] pubKey
     );
-
-    // Return value in case of signature failure, with no time-range.
-    // Equivalent to _packValidationData(true,0,0)
     uint256 private constant _SIG_VALIDATION_FAILED = 1;
 
-    constructor(IEntryPoint _entryPoint) {
+    // BLOCKLOCK: The constructor now calls the AbstractBlocklockReceiver constructor with address(0)
+    // The actual blocklockSender address will be set in the initializer.
+    constructor(
+        IEntryPoint _entryPoint
+    )
+        AbstractBlocklockReceiver(
+            address(0x82Fed730CbdeC5A2D8724F2e3b316a70A565e27e)
+        )
+    {
         entryPoint = _entryPoint;
         _disableInitializers();
     }
 
-    /**
-     * @dev The _entryPoint member is immutable, to reduce gas consumption. To upgrade EntryPoint,
-     * a new implementation of SimpleAccount must be deployed with the new EntryPoint address, then upgrading
-     * the implementation by calling `upgradeTo()`
-     */
     function initialize(
-        bytes32[2] memory aPublicKey
+        bytes32[2] memory aPublicKey,
+        // BLOCKLOCK: Add blocklockSender to the initializer
+        address _blocklockSender
     ) public virtual initializer {
         _initialize(aPublicKey);
+        // BLOCKLOCK: Initialize the blocklock sender address
+        _setBlocklockSender(_blocklockSender);
     }
 
     function _initialize(bytes32[2] memory aPublicKey) internal virtual {
@@ -65,14 +83,10 @@ contract SimpleAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         emit SimpleAccountInitialized(entryPoint, [publicKey.X, publicKey.Y]);
     }
 
-    // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
-
-    // solhint-disable-next-line no-empty-blocks
     fallback() external payable {}
 
     function _onlyOwner() internal view {
-        //directly through the account itself (which gets redirected through execute())
         require(msg.sender == address(this), "only account itself can call");
     }
 
@@ -83,12 +97,67 @@ contract SimpleAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         }
     }
 
+    // BLOCKLOCK: New function to handle MEV-resistant (encrypted) transactions
+    /**
+     * @notice Creates a time-locked request for an encrypted batch of calls.
+     * @param encryptedCallsData The encrypted Call[] array.
+     * @param condition The on-chain condition for decryption (e.g., block number).
+     * @param callbackGasLimit The gas limit for the callback function.
+     */
+    function executeEncryptedBatch(
+        TypesLib.Ciphertext calldata encryptedCallsData,
+        bytes calldata condition,
+        uint32 callbackGasLimit
+    ) external payable onlyEntryPoint returns (uint256 requestId) {
+        require(blocklockSender != address(0), "Blocklock sender not set");
+
+        (uint256 _requestId, ) = _requestBlocklockPayInNative(
+            callbackGasLimit,
+            condition,
+            encryptedCallsData
+        );
+
+        // Store the encrypted data against the request ID
+        encryptedCalls[_requestId] = encryptedCallsData;
+
+        return _requestId;
+    }
+
+    // BLOCKLOCK: Callback function called by the dcipher network
+    /**
+     * @notice Callback function that receives the decryption key and executes the transaction.
+     * @param _requestId The ID of the decryption request.
+     * @param decryptionKey The key to decrypt the stored ciphertext.
+     */
+    function _onBlocklockReceived(
+        uint256 _requestId,
+        bytes calldata decryptionKey
+    ) internal override {
+        // Retrieve the encrypted payload
+        TypesLib.Ciphertext memory encryptedData = encryptedCalls[_requestId];
+        require(
+            encryptedData.ciphertext.length > 0,
+            "No encrypted data found for request"
+        );
+
+        // Decrypt the payload to get the original `Call[]`
+        bytes memory decryptedData = _decrypt(encryptedData, decryptionKey);
+        Call[] memory calls = abi.decode(decryptedData, (Call[]));
+
+        // Execute the calls
+        for (uint256 i = 0; i < calls.length; i++) {
+            _call(calls[i].dest, calls[i].value, calls[i].data);
+        }
+
+        // Clean up state
+        delete encryptedCalls[_requestId];
+    }
+
     function _validateSignature(
         bytes memory message,
         bytes calldata signature
     ) private view returns (bool) {
         Signature memory sig = abi.decode(signature, (Signature));
-
         return
             WebAuthn.verifySignature({
                 challenge: message,
@@ -163,8 +232,6 @@ contract SimpleAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         onlyEntryPoint
         returns (uint256 validationData)
     {
-        // Note: `forge coverage` incorrectly marks this function and downstream
-        // as non-covered.
         validationData = _validateUserOpSignature(userOp, userOpHash);
         _payPrefund(missingAccountFunds);
     }
@@ -175,7 +242,7 @@ contract SimpleAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
                 value: missingAccountFunds,
                 gas: type(uint256).max
             }("");
-            (success); // no-op; silence unused variable warning
+            (success);
         }
     }
 
@@ -189,10 +256,9 @@ contract SimpleAccount is IAccount, UUPSUpgradeable, Initializable, IERC1271 {
         _;
     }
 
-    /// UUPSUpsgradeable: only allow self-upgrade.
     function _authorizeUpgrade(
         address newImplementation
     ) internal view override onlySelf {
-        (newImplementation); // No-op; silence unused parameter warning
+        (newImplementation);
     }
 }
