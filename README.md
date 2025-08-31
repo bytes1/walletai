@@ -58,6 +58,8 @@ Maximal Extractable Value (MEV) is an invisible tax on users. WALLET AI combats 
 5. Blocklock releases the decryption key after block finalization.
 6. Wallet decrypts and executes the transaction — too late for MEV bots to exploit.
 
+<img src="images/7.png" height="300"/>
+
 ## 🛠️ Structure of a UserOperation
 
 ```solidity
@@ -114,6 +116,8 @@ struct UserOperation {
 This example represents a **token transfer** from an account abstraction wallet.
 
 ---
+
+<img src="images/8.png" height="300"/>
 
 ### 🤖 AI-Powered Smart Contract Deployment
 
