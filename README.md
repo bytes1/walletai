@@ -155,10 +155,13 @@ WALLET AI is more than a wallet — it’s an evolving ecosystem.
 
 ### ✅ Time-Locked Messages
 
+<img src="images/5.png" height="300"/>
 - Encrypt and send assets/messages into the future.
 - Use cases: wills, digital time capsules, delayed disclosures.
 
 ### ✅ Bomb NFT
+
+<img src="images/nft.png" height="300"/>
 
 - NFTs with hidden encrypted messages revealed only after conditions unlock.
 - Creates evolving NFT experiences.
