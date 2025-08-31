@@ -135,7 +135,7 @@ This example represents a **token transfer** from an account abstraction wallet.
 
 ## 🚀 Previous week Integrations
 
-[Week2 Live Demo on Loom](https://www.loom.com/share/7566d39131254596abd7bde968999c8f)
+[Week2 Live Demo on Loom](https://www.loom.com/share/7566d39131254596abd7bde968999c8f) <br>
 [Week3 Live Demo on Youtube](https://youtu.be/lKZnB0gOny0)
 
 WALLET AI is more than a wallet — it’s an evolving ecosystem.
