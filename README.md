@@ -1,12 +1,10 @@
-# 🧠 WALLET AI — Passkey MEV-Resistant Smart Wallet (ERC-4337)
-
-> **Note**
+# 🧠 WALLET AI — Passkey MEV-Resistant Smart Wallet
 
 ---
 
 # 🎥 Live Demo
 
-[Watch the Live Demo on Youtube](https://youtu.be/ZvpA0BlrIBQ)
+[Watch the Live Demo on Youtube](https://youtu.be/2__2sPO4Rfc)
 
 ---
 
@@ -37,11 +35,9 @@ Blockchain should be as universal and easy as using any everyday app, bringing d
 - ✅ **Passkeys (WebAuthn):** Secure, passwordless authentication (no mnemonics).
 - ✅ **MEV Resistance:** Blocklock-encrypted transactions prevent front-running.
 - ✅ **Gasless Transactions:** Powered by Paymaster & Bundler infra.
-- ✅ **Telegram Mini App Integration:** Onboard via chat.
 - ✅ **WalletConnect:** Plug-and-play with dApps.
 - ✅ **Genesis Soulbound Token:** A unique, on-chain identity.
 - ✅ **Batch Transactions:** Multiple operations in a single `UserOperation`.
-- ✅ **Upgradeable Accounts:** UUPS proxy pattern for future-proofing.
 
 ---
 
@@ -62,9 +58,85 @@ Maximal Extractable Value (MEV) is an invisible tax on users. WALLET AI combats 
 5. Blocklock releases the decryption key after block finalization.
 6. Wallet decrypts and executes the transaction — too late for MEV bots to exploit.
 
+## 🛠️ Structure of a UserOperation
+
+```solidity
+struct UserOperation {
+    address sender;             // The smart contract wallet (account abstraction account)
+    uint256 nonce;              // Prevents replay attacks
+    bytes initCode;             // Code to deploy the wallet if it doesn’t exist yet
+    bytes callData;             // Encoded function call(s) the user wants to execute
+    uint256 callGasLimit;       // Gas for the actual call execution
+    uint256 verificationGasLimit; // Gas for validation logic
+    uint256 preVerificationGas; // Gas to cover calldata + bundler overhead
+    uint256 maxFeePerGas;       // Max fee per gas (like EIP-1559)
+    uint256 maxPriorityFeePerGas; // Miner/validator tip
+    bytes paymasterAndData;     // Info for Paymaster (gas sponsor, optional)
+    bytes signature;            // Signature proving user authorization
+}
+```
+
 ---
 
-## 🚀 New Integrations
+## 🔑 Key Fields Explained
+
+- **sender** → Your smart account address.
+- **nonce** → Prevents replay (increments every operation).
+- **initCode** → Deploys your wallet if it doesn’t exist yet (great for one-click onboarding).
+- **callData** → The action (e.g., transfer tokens, swap, contract call).
+  - ✅ _Here we are encrypting `callData` using **dCipher Blocklock encryption** to provide MEV resistance. The data stays hidden until a certain condition (like block height) is met, preventing front-running._
+- **callGasLimit / verificationGasLimit** → Gas budgets for execution + validation.
+- **preVerificationGas** → Pays bundlers for calldata overhead.
+- **maxFeePerGas / maxPriorityFeePerGas** → Same as EIP-1559 gas pricing.
+- **paymasterAndData** → Optional. If filled, a Paymaster can sponsor your gas.
+- **signature** → Proof you approved this operation (can be passkey, multisig, threshold, etc.).
+
+---
+
+## 📄 Example UserOperation JSON
+
+```json
+{
+  "sender": "0xYourSmartWallet",
+  "nonce": "0x01",
+  "initCode": "0x",
+  "callData": "0xa9059cbb000000000000000000000000Recipient0000000000000000000000000000000000000001",
+  "callGasLimit": "0x5208",
+  "verificationGasLimit": "0x100000",
+  "preVerificationGas": "0x30000",
+  "maxFeePerGas": "0x59682f00",
+  "maxPriorityFeePerGas": "0x59682f00",
+  "paymasterAndData": "0x",
+  "signature": "0xUserSignature"
+}
+```
+
+This example represents a **token transfer** from an account abstraction wallet.
+
+---
+
+### 🤖 AI-Powered Smart Contract Deployment
+
+<img src="images/4.png" height="300"/>
+
+- Integrated **AI Agent** that helps users generate and deploy **dCipher contracts**.
+- Users can simply ask in natural language (e.g., _“create a simple Blocklock encryption contract with unlock logic”_).
+- The generated contract is shown in an **editor** where users can review and edit before deployment.
+- One-click deployment directly from the wallet.
+- **Partial contract interaction implemented** (deploy + view supported, full interaction WIP).
+
+---
+
+## 🚧 Roadmap
+
+- [ ] Full contract interaction (function calls, state reads)
+- [ ] More advanced AI templates (auctions, voting, DAOs)
+- [ ] Multi-chain deployment support
+
+## 🚀 Previous week Integrations
+
+[Week2 Live Demo on Loom](https://www.loom.com/share/7566d39131254596abd7bde968999c8f)
+[Week3 Live Demo on Youtube](https://youtu.be/lKZnB0gOny0)
 
 WALLET AI is more than a wallet — it’s an evolving ecosystem.
 
@@ -72,6 +144,9 @@ WALLET AI is more than a wallet — it’s an evolving ecosystem.
 
 - Secret bids, revealed only after the auction ends.
 - Prevents last-second bid manipulation.
+
+<img src="images/1.png" height="300"/>
+<img src="images/3.png" height="300"/>
 
 ### ✅ Encrypted Voting & Governance Portal
 

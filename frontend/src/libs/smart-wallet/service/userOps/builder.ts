@@ -30,8 +30,8 @@ import { ENTRYPOINT_ABI, ENTRYPOINT_ADDRESS, FACTORY_ABI } from "@/constants";
 import { smartWallet } from "@/libs/smart-wallet";
 import { JsonRpcProvider } from "ethers";
 
-// --- BLOCKLOCK INTEGRATION: Assume Blocklock contract details are available ---
-const BLOCKLOCK_CONTRACT_ADDRESS: Hex = "0xdCE323C463D66FC6DBc31671f100382ad49C3796"; // Example Address
+
+const BLOCKLOCK_CONTRACT_ADDRESS: Hex = "0xdCE323C463D66FC6DBc31671f100382ad49C3796"; 
 const BLOCKLOCK_ABI = parseAbi([
   "function createTimelockRequestWithDirectFunding(uint64 callbackGasLimit, bytes calldata condition, bytes calldata ciphertext) payable",
 ]);
@@ -44,7 +44,7 @@ export class UserOpBuilder {
   public publicClient: PublicClient;
   public factoryContract: GetContractReturnType<typeof FACTORY_ABI, WalletClient, PublicClient>;
   public paymasterClient: JsonRpcProvider;
-  // --- BLOCKLOCK INTEGRATION: Add Blocklock SDK instance ---
+  
   public blocklock: Blocklock;
 
   constructor(chain: Chain) {
@@ -69,8 +69,7 @@ export class UserOpBuilder {
       publicClient: this.publicClient,
     });
     
-    // --- BLOCKLOCK INTEGRATION: Initialize the Blocklock SDK ---
-    // Using the public client as the provider for read-only operations like price calculation.
+
     this.blocklock = Blocklock.createBaseSepolia(this.publicClient);
   }
 
@@ -79,7 +78,7 @@ export class UserOpBuilder {
     maxFeePerGas,
     maxPriorityFeePerGas,
     keyId,
-    // --- BLOCKLOCK INTEGRATION: Add flag to enable encryption ---
+ 
     encrypt = false, 
   }: {
     calls: Call[];
@@ -106,7 +105,7 @@ export class UserOpBuilder {
     let finalCallData: Hex;
 
     if (encrypt) {
-      // 1. Generate the original, sensitive callData that we want to encrypt.
+
       const protectedCallData = this._addCallData(calls);
       
       // 2. Define encryption parameters.
