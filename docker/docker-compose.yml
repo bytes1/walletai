@@ -33,3 +33,15 @@ services:
     ports:
       - "${PAYMASTER_PORT}:${PAYMASTER_PORT}"
     command: ["./run.sh"]
+
+compiler-service:
+  build: .
+  container_name: foundry-compiler-service
+  ports:
+    - "8080:8080"
+  volumes:
+    # This volume syncs your local API code with the code inside the container.
+    # This means you can change the server.js file and restart the container
+    # without needing to rebuild the entire image.
+    - ./api:/usr/src/app/api
+  restart: unless-stopped

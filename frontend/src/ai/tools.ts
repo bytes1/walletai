@@ -331,6 +331,34 @@ export const getBombNftSecretMessage = tool({
   },
 });
 
+export const deploySmartContract = tool({
+  description: "Deploys a smart contract and returns the address and transaction hash.",
+  parameters: z.object({ code: z.string().describe("The Solidity code to be deployed") }),
+  execute: async ({ code }) => {
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+
+    // Generate mock data
+    const mockAddress = `0x${[...Array(40)].map(() => Math.floor(Math.random() * 16).toString(16)).join("")}`;
+    const mockHash = `0x${[...Array(64)].map(() => Math.floor(Math.random() * 16).toString(16)).join("")}`;
+
+    return {
+      code,
+    };
+  },
+});
+
+export const renderSolidityCode = tool({
+  description:
+    "Renders a given Solidity code block. Use this tool whenever you need to display smart contract code.",
+  parameters: z.object({
+    code: z.string().describe("The Solidity code to be rendered"),
+  }),
+  execute: async ({ code }) => {
+    return { code };
+  },
+});
+
+
 export const tools = {
   getWeather,
   cryptoToolPrice,
