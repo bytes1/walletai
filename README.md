@@ -150,12 +150,15 @@ WALLET AI is more than a wallet — it’s an evolving ecosystem.
 
 ### ✅ Encrypted Voting & Governance Portal
 
+<img src="images/6.png" height="300"/>
+
 - Votes stay private until polls close.
 - Prevents early voting influence and coercion.
 
 ### ✅ Time-Locked Messages
 
 <img src="images/5.png" height="300"/>
+
 - Encrypt and send assets/messages into the future.
 - Use cases: wills, digital time capsules, delayed disclosures.
 
