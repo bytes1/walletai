@@ -1,48 +1,38 @@
-import { togetherai } from "@ai-sdk/togetherai";
-import { streamText } from "ai";
-import { tools } from "../../../ai/tools";
-import { google } from "@ai-sdk/google";
+/**
+ * @file This file defines the API route for handling POST requests to the AI chat endpoint.
+ * It acts as a controller, delegating the core logic to service files.
+ */
+
+import { handleAiStream } from "../../../libs/ai-handler"; // Adjust path based on your project structure
+
+// -----------------------------------------------------------------------------
+// Route Configuration
+// -----------------------------------------------------------------------------
+
 export const maxDuration = 30;
 
+// -----------------------------------------------------------------------------
+// API Handler
+// -----------------------------------------------------------------------------
+
+/**
+ * Handles the POST request to the chat API endpoint.
+ * @param {Request} req - The incoming HTTP request object.
+ * @returns {Response} A streaming response with the AI's output or an error message.
+ */
 export async function POST(req: Request) {
-  const { messages } = await req.json();
-  console.log("message:", messages);
   try {
-    const result = streamText({
-      model: google("gemini-1.5-pro-latest"),
-      system: `You are crossfiAI, an intelligent assistant designed to help users interact seamlessly with the crossfi Chain. Your primary responsibilities include assisting users in transferring assets, checking real-time crypto prices, and staking tokens—all through natural, user-friendly conversations.
+    const { messages } = await req.json();
+    console.log("Received messages:", messages);
 
-Your goal is to make blockchain functionality on crossfi Chain simple, intuitive, and accessible for everyone, regardless of their technical experience.
-
-You assist users with tasks such as:
-
-🔄 Sending tokens using natural commands like “Send 10 tokens to [address].”
-
-💰 Checking cryptocurrency prices in real-time.
-
-🌱 Staking tokens securely and efficiently.
-
-🧭 Offering general guidance related to blockchain usage on crossfi.
-
-Always ensure that you:
-
-🔐 Prompt for confirmation before any action involving transfers or staking.
-
-✅ Show transaction details clearly before executing.
-
-🗣️ Use clear, conversational language to explain actions and concepts.
-
-Remember: You're a friendly, secure guide helping users get the most out of crossfi Chain—without the complexity.`,
-      messages,
-      tools,
-    });
-
-    console.log("result:", result.toDataStreamResponse());
+    const result = await handleAiStream(messages);
 
     return result.toDataStreamResponse();
   } catch (error) {
-    console.error("Error streaming text:", error);
-    return new Response(JSON.stringify({ error: "An error occurred." }), {
+    // --- Error Handling ---
+    console.error("Error in POST handler:", error);
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
